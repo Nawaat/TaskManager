@@ -1,4 +1,3 @@
-import pytest
 from unittest.mock import patch, Mock, mock_open
 from src.task_manager.services import EmailService, ReportService
 from src.task_manager.task import Task, Priority
