@@ -106,3 +106,25 @@ class TestTaskManagerPersistence:
         manager.tasks = [Task("T", priority=Priority.LOW)]
         manager.load_from_file()
         assert manager.tasks == []
+
+def test_delete_task_not_found():
+    manager = TaskManager()
+    assert manager.delete_task("id_inexistant") is False
+
+def test_save_to_file_exception(monkeypatch):
+    manager = TaskManager()
+    def raise_exc(*a, **kw): raise IOError("Erreur écriture")
+    monkeypatch.setattr("builtins.open", lambda *a, **kw: (_ for _ in ()).throw(IOError("Erreur écriture")))
+    manager.save_to_file()  # Doit juste afficher une erreur, pas lever
+
+def test_load_from_file_exception(monkeypatch):
+    manager = TaskManager()
+    def raise_exc(*a, **kw): raise IOError("Erreur lecture")
+    monkeypatch.setattr("builtins.open", lambda *a, **kw: (_ for _ in ()).throw(IOError("Erreur lecture")))
+    manager.load_from_file()  # Doit juste afficher une erreur, pas lever
+
+def test_get_statistics_empty():
+    manager = TaskManager()
+    stats = manager.get_statistics()
+    assert stats["total_tasks"] == 0
+    assert stats["completed_tasks"] == 0

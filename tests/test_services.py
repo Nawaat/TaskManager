@@ -52,3 +52,23 @@ class TestReportService:
         handle = mock_file()
         # Vérifie qu'il y a eu écriture (appel à write)
         assert handle.write.call_count > 0 
+
+def test_send_completion_notification_invalid_email():
+    service = EmailService()
+    with pytest.raises(ValueError):
+        service.send_completion_notification("invalidemail", "Tâche")
+
+def test_send_completion_notification_success():
+    service = EmailService()
+    assert service.send_completion_notification("test@example.com", "Tâche") is True
+
+def test_generate_daily_report_empty():
+    service = ReportService()
+    report = service.generate_daily_report([])
+    assert report["total_tasks"] == 0
+
+def test_export_tasks_csv_exception(monkeypatch):
+    service = ReportService()
+    def raise_exc(*a, **kw): raise IOError("Erreur écriture")
+    monkeypatch.setattr("builtins.open", lambda *a, **kw: (_ for _ in ()).throw(IOError("Erreur écriture")))
+    service.export_tasks_csv([], "dummy.csv")  # Doit juste afficher une erreur, pas lever 
